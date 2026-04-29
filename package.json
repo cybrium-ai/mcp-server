@@ -1,0 +1,64 @@
+{
+  "name": "@cybrium-ai/mcp-server",
+  "version": "0.2.1",
+  "description": "MCP server for Cybrium security tools — 1,815 rules, 75+ languages. SAST, secrets, IaC, K8s, supply-chain, endpoint posture.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cybrium-ai/mcp-server"
+  },
+  "homepage": "https://cybrium.ai",
+  "author": "Cybrium AI <hello@cybrium.ai>",
+  "bugs": {
+    "url": "https://github.com/cybrium-ai/mcp-server/issues"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://cybrium.ai"
+  },
+  "main": "dist/index.js",
+  "bin": {
+    "cybrium-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "security",
+    "sast",
+    "sca",
+    "secrets",
+    "vulnerability",
+    "scanner",
+    "cybrium",
+    "cyscan",
+    "claude",
+    "cursor",
+    "windsurf",
+    "ai-tools",
+    "devsecops",
+    "iac",
+    "kubernetes",
+    "terraform",
+    "cloudformation"
+  ],
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

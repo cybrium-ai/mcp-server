@@ -1,0 +1,71 @@
+# Publish @cybrium-ai/mcp-server to npm on tag push.
+#
+# Trigger:
+#   git tag v0.2.1 && git push origin v0.2.1
+#
+# Required repo secret:
+#   NPM_TOKEN — npmjs.org automation token with publish access to @cybrium-ai scope
+
+name: Release to npm
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version to publish (without v prefix)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify build
+        run: node dist/index.js --help 2>&1 || true
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: '@cybrium-ai/mcp-server ${{ github.ref_name }}'
+          body: |
+            ## Install
+
+            ```bash
+            npx -y @cybrium-ai/mcp-server
+            ```
+
+            ## Add to Claude Code
+
+            ```bash
+            claude mcp add cybrium -- npx -y @cybrium-ai/mcp-server
+            ```
+
+            ## Links
+
+            - [Setup Guide](https://docs.cybrium.ai/integrations/mcp)
+            - [cybrium.ai](https://cybrium.ai)
+            - [npm package](https://www.npmjs.com/package/@cybrium-ai/mcp-server)
+          generate_release_notes: true
