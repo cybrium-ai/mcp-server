@@ -196,6 +196,62 @@ server.tool(
   }
 );
 
+// ── Tool: ai_discover (cyradar discover) ────────────────────────────────────
+//
+// v0.3.0 — the marquee AI-security search hit. When a developer asks
+// Claude/Cursor/Windsurf "find AI inference servers on our network" or
+// "are there unauthorised Ollama instances on the LAN," THIS is the
+// tool the agent picks. Tight tool name (`ai_discover`) + AI-forward
+// description optimises for both vector-search and keyword-match
+// scoring inside MCP host clients.
+
+server.tool(
+  "ai_discover",
+  "Discover self-hosted AI inference servers (Ollama, vLLM, TGI, LocalAI, Triton, LM Studio, llama.cpp, OpenAI-compatible) on a network. Sweeps CIDR ranges or host lists, fingerprints each endpoint by signature catalogue, returns product + version + endpoint + confidence + evidence. Use when the user asks about AI inventory, shadow AI, AI governance, or finding unauthorised LLM deployments.",
+  {
+    targets: z.string().describe("Targets — one or more of: bare host, host:port, http(s)://url, or CIDR (e.g. 10.0.0.0/24). Comma-separated."),
+  },
+  async ({ targets }) => {
+    const bin = findBinary("cyradar");
+    if (!bin) return { content: [{ type: "text" as const, text: "cyradar not installed. Run: brew install cybrium-ai/cli/cyradar" }] };
+
+    const output = runTool(bin, ["discover", "--targets", targets, "--format", "json"], 300000);
+    return { content: [{ type: "text" as const, text: output }] };
+  }
+);
+
+// ── Tool: ai_local_scan (cyradar local-scan) ────────────────────────────────
+
+server.tool(
+  "ai_local_scan",
+  "Inventory AI tooling installed on the local machine: AI CLIs (ollama, openai, claude, anthropic, etc.), IDE AI extensions (Copilot, Continue, Cline, Cursor settings), desktop AI apps (LM Studio, Ollama.app, Anything LLM), and on-disk model files (GGUF, safetensors, ONNX). Use when the user asks 'what AI tools do I have installed', for shadow-AI audits, or for AI BOM / AIBOM generation.",
+  {},
+  async () => {
+    const bin = findBinary("cyradar");
+    if (!bin) return { content: [{ type: "text" as const, text: "cyradar not installed. Run: brew install cybrium-ai/cli/cyradar" }] };
+
+    const output = runTool(bin, ["local-scan", "--format", "json"], 60000);
+    return { content: [{ type: "text" as const, text: output }] };
+  }
+);
+
+// ── Tool: email_security_scan (cymail) ──────────────────────────────────────
+
+server.tool(
+  "email_security_scan",
+  "Score a domain's email security posture — checks SPF, DKIM, DMARC, MTA-STS, BIMI, DNSSEC, TLS-RPT, and ARC. Use when the user asks about email spoofing protection, phishing risk for a domain, or running an email-security audit.",
+  {
+    domain: z.string().describe("Domain to audit (e.g., example.com — not a full URL)"),
+  },
+  async ({ domain }) => {
+    const bin = findBinary("cymail");
+    if (!bin) return { content: [{ type: "text" as const, text: "cymail not installed. Run: brew install cybrium-ai/cli/cymail" }] };
+
+    const output = runTool(bin, ["scan", domain, "--format", "json"], 60000);
+    return { content: [{ type: "text" as const, text: output }] };
+  }
+);
+
 // ── Start ────────────────────────────────────────────────────────────────────
 
 async function main() {
