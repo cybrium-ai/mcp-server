@@ -54,8 +54,15 @@ function runTool(binary: string, args: string[], timeout = 60000): string {
     });
     return result.toString();
   } catch (err: any) {
-    if (err.stdout) return err.stdout.toString();
-    throw new Error(`${binary} failed: ${err.message}`);
+    // A tool that exits non-zero often still produced usable JSON on stdout
+    // (partial scan, findings-present exit codes), so prefer that.
+    const out = err.stdout ? err.stdout.toString().trim() : "";
+    if (out) return out;
+    // Otherwise surface stderr. Returning "" here made a failed invocation
+    // look like a clean empty result to the model — the worst outcome for a
+    // security tool, because "no output" reads as "nothing found".
+    const errText = err.stderr ? err.stderr.toString().trim() : "";
+    throw new Error(`${binary} failed: ${errText || err.message}`);
   }
 }
 
@@ -247,7 +254,8 @@ server.tool(
     const bin = findBinary("cymail");
     if (!bin) return { content: [{ type: "text" as const, text: "cymail not installed. Run: brew install cybrium-ai/cli/cymail" }] };
 
-    const output = runTool(bin, ["scan", domain, "--format", "json"], 60000);
+    // cymail takes the domain as a --domain flag, not positionally.
+    const output = runTool(bin, ["scan", "--domain", domain, "--format", "json"], 60000);
     return { content: [{ type: "text" as const, text: output }] };
   }
 );
