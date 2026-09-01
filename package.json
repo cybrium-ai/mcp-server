@@ -1,6 +1,6 @@
 {
   "name": "@cybrium-ai/mcp-server",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "MCP server for AI security + AI governance + AI inventory + code security. Lets Claude, Cursor, Windsurf, Cline invoke cyscan (SAST/SCA/secrets — 1,815 rules / 75+ languages), cyweb (web vulnerability scanner), cyprobe (network discovery), cyradar (discover self-hosted AI inference servers — Ollama, vLLM, TGI, LM Studio), and cymail (email security: SPF/DKIM/DMARC).",
   "repository": {
     "type": "git",

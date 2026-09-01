@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Cybrium MCP Server — exposes cyscan, cyweb, and cyprobe as MCP tools
+ * Cybrium MCP Server — exposes cyscan, cyweb, cyprobe and cynet as MCP tools
  * for AI coding assistants (Claude Code, Cursor, Windsurf, etc.)
  *
  * Tools:
@@ -9,7 +9,8 @@
  *   health        — repository security health check
  *   frameworks    — detect frameworks in codebase
  *   web_scan      — web vulnerability scan (cyweb)
- *   discover      — network device discovery (cyprobe)
+ *   network_discover — network device discovery (cyprobe)
+ *   network_scan  — host / port / service / OS scan (cynet)
  *   fix           — apply autofix for findings
  *
  * Install: npm install -g @cybrium-ai/mcp-server
@@ -199,6 +200,23 @@ server.tool(
     args.push("--format", "json");
 
     const output = runTool(bin, args, 120000);
+    return { content: [{ type: "text" as const, text: output }] };
+  }
+);
+
+// ── Tool: network_scan (cynet) ───────────────────────────────────────────────
+
+server.tool(
+  "network_scan",
+  "Scan a host or network for open ports, services, and OS — host discovery plus port/service detection, OS fingerprinting, and exposed-service / protocol-hygiene findings (cleartext services, unauthenticated datastores, exposed admin planes). Fast native scanner. Accepts a host, IP, or CIDR.",
+  {
+    target: z.string().describe("Host, IP, or CIDR to scan (e.g., 192.168.1.10 or 10.0.0.0/24)"),
+  },
+  async ({ target }) => {
+    const bin = findBinary("cynet");
+    if (!bin) return { content: [{ type: "text" as const, text: "cynet not installed. Run: brew install cybrium-ai/cli/cynet" }] };
+
+    const output = runTool(bin, ["scan", target, "--format", "json"], 300000);
     return { content: [{ type: "text" as const, text: output }] };
   }
 );
